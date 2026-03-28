@@ -3,59 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Al sana | Attendance extractor</title>
+    <title>Duty Hub Ultra | Pro Excel Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
-        body { background: radial-gradient(circle at top left, #0f172a, #020617); color: #f1f5f9; min-height: 100vh; overflow-x: hidden; }
+        body { background: radial-gradient(circle at top right, #0f172a, #020617); color: #f1f5f9; min-height: 100vh; overflow-x: hidden; }
         .glass { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.05); }
-        
-        /* Progress Overlay */
         #loader { display: none; }
         .spinner { border: 3px solid rgba(59, 130, 246, 0.1); border-top: 3px solid #3b82f6; border-radius: 50%; width: 50px; height: 50px; animation: spin 0.8s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        
-        /* Table Optimization */
-        .table-container { max-height: 70vh; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #334155 transparent; }
-        tr { contain: layout; } 
+        .table-container { max-height: 70vh; overflow-y: auto; }
     </style>
 </head>
 <body class="p-4 md:p-10 font-sans">
 
     <div id="loader" class="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-slate-950/90 backdrop-blur-md">
         <div class="spinner mb-6"></div>
-        <h2 class="text-xl font-bold text-white tracking-widest uppercase">Analyzing 10k+ Records</h2>
+        <h2 class="text-xl font-bold text-white tracking-widest uppercase">Processing 10k+ Records</h2>
         <div class="w-64 bg-slate-800 h-1.5 rounded-full mt-4 overflow-hidden">
             <div id="progressBar" class="bg-blue-500 h-full w-0 transition-all duration-300"></div>
         </div>
-        <p id="progressText" class="text-slate-500 font-mono text-xs mt-3 uppercase tracking-tighter">Initializing...</p>
+        <p id="progressText" class="text-slate-500 font-mono text-xs mt-3 uppercase tracking-tighter">Preparing...</p>
     </div>
 
     <div class="max-w-7xl mx-auto">
         <div class="flex flex-col md:flex-row justify-between items-center mb-10 gap-6">
             <div>
-                <h1 class="text-4xl font-black text-white tracking-tighter">Al sana | Attendance extractor <span class="text-blue-500 italic">v1.0</span></h1>
-                <p class="text-slate-400 text-sm mt-1">Status: <span class="text-emerald-400 font-bold">Ready for Large Data</span> • Exact Calculation</p>
+                <h1 class="text-4xl font-black text-white tracking-tighter">Shift Duty Hub <span class="text-blue-500 italic text-xl">PRO</span></h1>
+                <p class="text-slate-400 text-sm mt-1 uppercase tracking-wider">Exact Duty • Midnight Support • Excel Shift Column</p>
             </div>
-            <button onclick="exportToExcel()" id="dlBtn" class="hidden bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3.5 px-8 rounded-2xl transition-all shadow-xl flex items-center gap-3">
+            <button onclick="exportToExcel()" id="dlBtn" class="hidden bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3.5 px-8 rounded-2xl transition-all shadow-xl flex items-center gap-3 active:scale-95">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                 Download Excel Report
             </button>
         </div>
 
         <div class="glass p-8 rounded-[2rem] mb-10 shadow-2xl">
-            <div class="flex justify-between items-center mb-4">
-                <span class="text-[10px] font-bold text-blue-400 uppercase tracking-widest">Paste ID & Date-Time Columns Below</span>
-                <span class="text-slate-600 text-[10px]">Supports Midnight Crossover & Split Shifts</span>
-            </div>
-            <textarea id="rawInput" class="w-full h-48 bg-slate-950/50 border border-slate-800 rounded-2xl p-5 text-sm font-mono focus:ring-1 focus:ring-blue-500 outline-none transition-all placeholder-slate-800" 
-            placeholder="Paste your data from Excel here..."></textarea>
+            <textarea id="rawInput" class="w-full h-48 bg-slate-950/50 border border-slate-800 rounded-2xl p-5 text-sm font-mono focus:ring-1 focus:ring-blue-500 outline-none transition-all" 
+            placeholder="Paste ID and Date-Time columns from Excel here..."></textarea>
             
             <div class="mt-6 flex items-center gap-4">
                 <button onclick="processBigData()" class="bg-blue-600 hover:bg-blue-500 text-white font-black py-4 px-12 rounded-2xl transition-all shadow-lg active:scale-95">
                     START PROCESSING
                 </button>
-                <button onclick="location.reload()" class="text-slate-600 hover:text-white text-xs underline decoration-slate-800">Clear Page</button>
+                <button onclick="location.reload()" class="text-slate-600 hover:text-white text-xs underline">Reset Page</button>
             </div>
         </div>
 
@@ -64,11 +55,11 @@
                 <table class="w-full text-left border-collapse">
                     <thead class="bg-slate-900/50 sticky top-0 z-10 backdrop-blur-md">
                         <tr class="text-[10px] uppercase tracking-widest text-slate-400 border-b border-white/5">
-                            <th class="p-6">Employee / Date</th>
+                            <th class="p-6">Employee & Date</th>
                             <th class="p-6 text-center">In / Out (Part 1)</th>
                             <th class="p-6 text-center">In / Out (Part 2)</th>
                             <th class="p-6 text-center">Shift Type</th>
-                            <th class="p-6 text-right text-emerald-400">Total Exact Hrs</th>
+                            <th class="p-6 text-right text-emerald-400">Exact Duty Hrs</th>
                         </tr>
                     </thead>
                     <tbody id="outputBody" class="divide-y divide-white/5"></tbody>
@@ -105,7 +96,7 @@
             const lines = input.split('\n');
             const dataMap = new Map();
 
-            // Grouping Logic
+            // Grouping lines by ID and Date
             lines.forEach(line => {
                 const cols = line.split('\t');
                 const id = cols[0]?.trim();
@@ -126,7 +117,7 @@
             reportData = [];
 
             let currentIndex = 0;
-            const batchSize = 150;
+            const batchSize = 200;
 
             function processBatch() {
                 const end = Math.min(currentIndex + batchSize, results.length);
@@ -135,21 +126,19 @@
                 for (let i = currentIndex; i < end; i++) {
                     const entry = results[i];
                     
-                    // SMART NIGHT SORT: If first punch is late PM, AM punches are treated as Next Day (+24h)
+                    // Logic to handle Night Shift Sorting (Normalization)
                     let basePunches = entry.punches.map(p => ({ raw: p, hrs: parseToHours(p) }));
-                    basePunches.sort((a, b) => a.hrs - b.hrs);
-                    
-                    // If spread suggests night shift (e.g. 7pm and 1am), normalize the early AM times
-                    let firstPunch = basePunches[0].hrs;
-                    let lastPunch = basePunches[basePunches.length - 1].hrs;
-                    if (lastPunch - firstPunch > 12) { 
-                        // This likely isn't a single shift or needs normalization
-                        // Let's use the sequence logic:
+                    let first = Math.min(...basePunches.map(p => p.hrs));
+                    let last = Math.max(...basePunches.map(p => p.hrs));
+
+                    if (last - first > 12) { 
                         basePunches.sort((a, b) => {
                             let valA = a.hrs < 6 ? a.hrs + 24 : a.hrs;
                             let valB = b.hrs < 6 ? b.hrs + 24 : b.hrs;
                             return valA - valB;
                         });
+                    } else {
+                        basePunches.sort((a, b) => a.hrs - b.hrs);
                     }
 
                     const t1 = basePunches[0]?.raw || "-";
@@ -165,46 +154,40 @@
                     };
 
                     const totalExact = calc(t1, t2) + calc(t3, t4);
-                    const isNight = (parseToHours(t1) >= 17 || parseToHours(t1) < 4);
+                    const shiftType = (parseToHours(t1) >= 17 || parseToHours(t1) < 4) ? "Night" : "Day";
 
                     const tr = document.createElement('tr');
-                    tr.className = "hover:bg-white/[0.02] transition-colors";
+                    tr.className = "hover:bg-white/[0.02]";
                     tr.innerHTML = `
-                        <td class="p-6">
-                            <div class="text-blue-300 font-bold font-mono text-sm">${entry.id}</div>
-                            <div class="text-slate-500 text-[10px] font-bold">${entry.date}</div>
-                        </td>
-                        <td class="p-6 text-center font-mono text-xs">
-                            <span class="text-slate-300">${formatTime(t1)}</span> <span class="text-slate-700 mx-1">→</span> <span class="text-slate-300">${formatTime(t2)}</span>
-                        </td>
-                        <td class="p-6 text-center font-mono text-xs">
-                            ${t3 !== "-" ? `<span class="text-slate-300">${formatTime(t3)}</span> <span class="text-slate-700 mx-1">→</span> <span class="text-slate-300">${formatTime(t4)}</span>` : '<span class="text-slate-800">---</span>'}
-                        </td>
+                        <td class="p-6"><div class="text-blue-300 font-bold font-mono">${entry.id}</div><div class="text-slate-500 text-[10px] uppercase">${entry.date}</div></td>
+                        <td class="p-6 text-center font-mono text-xs text-slate-300">${formatTime(t1)} → ${formatTime(t2)}</td>
+                        <td class="p-6 text-center font-mono text-xs text-slate-300">${t3 !== "-" ? formatTime(t3) + ' → ' + formatTime(t4) : '---'}</td>
                         <td class="p-6 text-center">
-                            <span class="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${isNight ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20' : 'bg-orange-500/10 text-orange-400 border border-orange-500/20'}">
-                                ${isNight ? 'Night Shift' : 'Day Shift'}
+                            <span class="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${shiftType === 'Night' ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20' : 'bg-orange-500/10 text-orange-400 border border-orange-500/20'}">
+                                ${shiftType}
                             </span>
                         </td>
-                        <td class="p-6 text-right font-black text-emerald-400 text-lg font-mono">
-                            ${totalExact.toFixed(2)}
-                        </td>
+                        <td class="p-6 text-right font-black text-emerald-400 text-lg font-mono">${totalExact.toFixed(2)}</td>
                     `;
                     fragment.appendChild(tr);
 
                     reportData.push({
-                        "Employee ID": entry.id, "Date": entry.date,
-                        "Part1_In": formatTime(t1), "Part1_Out": formatTime(t2),
-                        "Part2_In": formatTime(t3), "Part2_Out": formatTime(t4),
-                        "Total Hours": totalExact.toFixed(2)
+                        "Employee ID": entry.id,
+                        "Date": entry.date,
+                        "In 1": formatTime(t1),
+                        "Out 1": formatTime(t2),
+                        "In 2": formatTime(t3),
+                        "Out 2": formatTime(t4),
+                        "Shift Type": shiftType,
+                        "Total Duty Hours": parseFloat(totalExact.toFixed(2))
                     });
                 }
 
                 tbody.appendChild(fragment);
                 currentIndex = end;
-
                 const pct = Math.round((currentIndex / results.length) * 100);
                 document.getElementById('progressBar').style.width = pct + '%';
-                document.getElementById('progressText').innerText = `Compiled ${currentIndex} of ${results.length} Workers...`;
+                document.getElementById('progressText').innerText = `Batch Processing: ${currentIndex} / ${results.length}`;
 
                 if (currentIndex < results.length) {
                     requestAnimationFrame(processBatch);
@@ -214,15 +197,14 @@
                     document.getElementById('dlBtn').classList.remove('hidden');
                 }
             }
-
             processBatch();
         }
 
         function exportToExcel() {
             const ws = XLSX.utils.json_to_sheet(reportData);
             const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Attendance_Final");
-            XLSX.writeFile(wb, "Final_Exact_Attendance_Report.xlsx");
+            XLSX.utils.book_append_sheet(wb, ws, "Attendance_Report");
+            XLSX.writeFile(wb, "Attendance_Report_With_Shift.xlsx");
         }
     </script>
 </body>
