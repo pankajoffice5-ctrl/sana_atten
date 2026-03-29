@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Duty Hub Ultra | Pro Excel Edition</title>
+    <title>Al Sana | Attendance Extractor PROv1</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
@@ -12,25 +12,25 @@
         #loader { display: none; }
         .spinner { border: 3px solid rgba(59, 130, 246, 0.1); border-top: 3px solid #3b82f6; border-radius: 50%; width: 50px; height: 50px; animation: spin 0.8s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .table-container { max-height: 70vh; overflow-y: auto; }
+        .table-container { max-height: 70vh; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #334155 transparent; }
     </style>
 </head>
 <body class="p-4 md:p-10 font-sans">
 
     <div id="loader" class="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-slate-950/90 backdrop-blur-md">
         <div class="spinner mb-6"></div>
-        <h2 class="text-xl font-bold text-white tracking-widest uppercase">Processing 10k+ Records</h2>
+        <h2 class="text-xl font-bold text-white tracking-widest uppercase">Processing Big Data</h2>
         <div class="w-64 bg-slate-800 h-1.5 rounded-full mt-4 overflow-hidden">
             <div id="progressBar" class="bg-blue-500 h-full w-0 transition-all duration-300"></div>
         </div>
-        <p id="progressText" class="text-slate-500 font-mono text-xs mt-3 uppercase tracking-tighter">Preparing...</p>
+        <p id="progressText" class="text-slate-500 font-mono text-xs mt-3 uppercase tracking-tighter">Analyzing timestamps...</p>
     </div>
 
     <div class="max-w-7xl mx-auto">
         <div class="flex flex-col md:flex-row justify-between items-center mb-10 gap-6">
             <div>
-                <h1 class="text-4xl font-black text-white tracking-tighter">Shift Duty Hub <span class="text-blue-500 italic text-xl">PRO</span></h1>
-                <p class="text-slate-400 text-sm mt-1 uppercase tracking-wider">Exact Duty • Midnight Support • Excel Shift Column</p>
+                <h1 class="text-4xl font-black text-white tracking-tighter">Al Sana | Attendance Extractor <span class="text-blue-500 italic text-xl">PRO</span></h1>
+                <p class="text-slate-400 text-sm mt-1 uppercase tracking-wider">Exact Duty • Midnight Support • Punch Count Auditor</p>
             </div>
             <button onclick="exportToExcel()" id="dlBtn" class="hidden bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3.5 px-8 rounded-2xl transition-all shadow-xl flex items-center gap-3 active:scale-95">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
@@ -40,7 +40,7 @@
 
         <div class="glass p-8 rounded-[2rem] mb-10 shadow-2xl">
             <textarea id="rawInput" class="w-full h-48 bg-slate-950/50 border border-slate-800 rounded-2xl p-5 text-sm font-mono focus:ring-1 focus:ring-blue-500 outline-none transition-all" 
-            placeholder="Paste ID and Date-Time columns from Excel here..."></textarea>
+            placeholder="Paste ID and Date-Time columns here (10,000+ rows supported)..."></textarea>
             
             <div class="mt-6 flex items-center gap-4">
                 <button onclick="processBigData()" class="bg-blue-600 hover:bg-blue-500 text-white font-black py-4 px-12 rounded-2xl transition-all shadow-lg active:scale-95">
@@ -58,8 +58,9 @@
                             <th class="p-6">Employee & Date</th>
                             <th class="p-6 text-center">In / Out (Part 1)</th>
                             <th class="p-6 text-center">In / Out (Part 2)</th>
-                            <th class="p-6 text-center">Shift Type</th>
-                            <th class="p-6 text-right text-emerald-400">Exact Duty Hrs</th>
+                            <th class="p-6 text-center">Shift</th>
+                            <th class="p-6 text-center">Punches</th>
+                            <th class="p-6 text-right text-emerald-400">Total Duty Hrs</th>
                         </tr>
                     </thead>
                     <tbody id="outputBody" class="divide-y divide-white/5"></tbody>
@@ -96,7 +97,7 @@
             const lines = input.split('\n');
             const dataMap = new Map();
 
-            // Grouping lines by ID and Date
+            // Grouping logic
             lines.forEach(line => {
                 const cols = line.split('\t');
                 const id = cols[0]?.trim();
@@ -125,13 +126,14 @@
 
                 for (let i = currentIndex; i < end; i++) {
                     const entry = results[i];
+                    const punchCount = entry.punches.length;
                     
-                    // Logic to handle Night Shift Sorting (Normalization)
+                    // Night Shift Normalization Logic
                     let basePunches = entry.punches.map(p => ({ raw: p, hrs: parseToHours(p) }));
-                    let first = Math.min(...basePunches.map(p => p.hrs));
-                    let last = Math.max(...basePunches.map(p => p.hrs));
+                    let firstHr = Math.min(...basePunches.map(p => p.hrs));
+                    let lastHr = Math.max(...basePunches.map(p => p.hrs));
 
-                    if (last - first > 12) { 
+                    if (lastHr - firstHr > 12) { 
                         basePunches.sort((a, b) => {
                             let valA = a.hrs < 6 ? a.hrs + 24 : a.hrs;
                             let valB = b.hrs < 6 ? b.hrs + 24 : b.hrs;
@@ -167,6 +169,11 @@
                                 ${shiftType}
                             </span>
                         </td>
+                        <td class="p-6 text-center">
+                            <span class="font-mono text-sm ${punchCount < 4 ? 'text-red-400' : punchCount > 4 ? 'text-yellow-400' : 'text-slate-400'}">
+                                ${punchCount}
+                            </span>
+                        </td>
                         <td class="p-6 text-right font-black text-emerald-400 text-lg font-mono">${totalExact.toFixed(2)}</td>
                     `;
                     fragment.appendChild(tr);
@@ -179,6 +186,7 @@
                         "In 2": formatTime(t3),
                         "Out 2": formatTime(t4),
                         "Shift Type": shiftType,
+                        "Total Punches": punchCount,
                         "Total Duty Hours": parseFloat(totalExact.toFixed(2))
                     });
                 }
@@ -187,7 +195,7 @@
                 currentIndex = end;
                 const pct = Math.round((currentIndex / results.length) * 100);
                 document.getElementById('progressBar').style.width = pct + '%';
-                document.getElementById('progressText').innerText = `Batch Processing: ${currentIndex} / ${results.length}`;
+                document.getElementById('progressText').innerText = `Auditing: ${currentIndex} / ${results.length} records`;
 
                 if (currentIndex < results.length) {
                     requestAnimationFrame(processBatch);
@@ -204,7 +212,7 @@
             const ws = XLSX.utils.json_to_sheet(reportData);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "Attendance_Report");
-            XLSX.writeFile(wb, "Attendance_Report_With_Shift.xlsx");
+            XLSX.writeFile(wb, "Final_Attendance_Audit.xlsx");
         }
     </script>
 </body>
